@@ -1,0 +1,165 @@
+# NAME
+
+Astro::MoonPhase::Simple - Calculate the phase of the Moon on a given time without too much blah blah
+
+# VERSION
+
+Version 0.03
+
+# SYNOPSIS
+
+This package provides a single subroutine to calculate the phase of the moon
+on a given time. The results are returned as a hash.
+
+The heavy lifting is done by [Astro::MoonPhase](https://metacpan.org/pod/Astro%3A%3AMoonPhase). All this package does
+is to wrap the functionality of [Astro::MoonPhase](https://metacpan.org/pod/Astro%3A%3AMoonPhase) adding some parameter
+checking.
+
+    use Astro::MoonPhase::Simple;
+
+    my $res = calculate_moon_phase({
+      'date' => '1974-07-15',
+      'timezone' => 'Asia/Nicosia',
+    });
+    print "moon is ".$res->{'MoonPhase%'}."% full\n";
+    print "moon is illuminated by ".$res->{'MoonIllum%'}."%\n";
+
+    print $res->{'asString'};
+
+    # alternatively provide location coordinates
+    # (instead of timezone) to deduce the timezone
+    my $res = calculate_moon_phase({
+      'date' => '1974-07-15',
+      'time' => '04:00',
+      'location' => {lat=>49.180000, lon=>-0.370000}
+    });
+
+    # alternatively provide a nameplace instead of a timezone
+    # to deduce the timezone
+    my $res = calculate_moon_phase({
+      'date' => '1974-07-15',
+      'time' => '04:00',
+      'location' => 'Nicosia',
+    });
+
+    ...
+
+# EXPORT
+
+- `calculate_moon_phase()`
+
+# SUBROUTINES
+
+## calculate\_moon\_phase
+
+This is the main and only subroutine which is
+exported by default. It expects a HASH reference
+as its input parameter containing `date`, in the
+form "YYYY-MM-DD", and optionally `time`, in
+the form "hh:mm:ss". The timezone the date is pertaining
+to can be specified using key "timezone", in the form
+of a TZ identifier, e.g. "Africa/Abidjan". Alternatively,
+specify the location, as a HASHref of `{lon, lat}`,
+the moon is observed from and this
+will deduce the timezone, albeit not always as accurately
+as with specifying a "timezone" explicitly.
+
+Warning: if the caller does not specify a `timezone` or `location`
+then the specified `time` will be assumed to be **UTC time** and not
+at the local timezone of the host.
+
+[Astro::MoonPhase](https://metacpan.org/pod/Astro%3A%3AMoonPhase) calculates the moon phase
+given an _epoch_. Which is the number of seconds
+since 1970-01-01 **on a UTC timezone**. This epoch
+is corrected to a "_localepoch_" by adding to it
+the specific timezone offset. For example, if you
+specified the timezone to be "China/Beijing" and
+the local time (at the specified timezone) to be 23:00.
+It means UTC time is 15:00. The epoch will be calculated
+on UTC time. However, we add `23:00-15:00=8:00` hours to
+that epoch to make it "_localepoch_" and this is
+what we pass on to [Astro::MoonPhase](https://metacpan.org/pod/Astro%3A%3AMoonPhase) to calculate
+the moon phase.
+
+On failure it returns `undef`.
+On success it returns a HASHref with keys:
+
+- `MoonPhase` : the moon phase (terminator phase angle) as a number between 0 and 1. New Moon (dark) being 0 and Full Moon (bright) being 1.
+- `MoonPhase%` : the above as a percentage.
+- `MoonIllum` : the illuminated fraction of the moon's disc as a number between 0 and 1. New Moon (dark) being 0 and Full Moon (bright) being 1.
+- `MoonIllum%` : the above as a percentage.
+- `MoonAge` : the fractional number of days since the Moon's birth (new moon), at specified date.
+- `MoonDist` : the distance of the Moon from the centre of the Earth (kilometers).
+- `MoonAng` : the angular diameter subtended by the Moon as seen by an observer at the centre of the Earth
+- `SunDist` : Moon's distance from the Sun (kilometers).
+- `SunAng` : the angular size of Sun (degrees).
+- `phases` : a HASHref containing the date and time for the various Moon phases (at specified date). It contains keys `New Moon, First quarter, Full moon, Last quarter, Next New Moon`
+- `asString` : a string representation of the above.
+
+# SCRIPT
+
+The script `moon-phase-calculator.pl` is provided for doing
+the calculations via the command line.
+
+Example usage: `moon-phase-calculator.pl --date 1974-07-14 --timezone 'Asia/Nicosia'`
+
+# SEE ALSO
+
+This package summarises the post and
+discussion [this post](https://perlmonks.org/?node_id=11137299)
+over at PerlMonks.org
+
+There are some more goodies in that post e.g. PerlMonk Aldebaran provides
+code for tracking the planets and at different altitudes.
+
+I can't iterate enough that this module wraps the
+functionality of [Astro::MoonPhase](https://metacpan.org/pod/Astro%3A%3AMoonPhase).
+[Astro::MoonPhase](https://metacpan.org/pod/Astro%3A%3AMoonPhase) does all the heavy lifting.
+
+# CAVEATS
+
+In [calculate\_moon\_phase](https://metacpan.org/pod/calculate_moon_phase), if the caller does not specify a `timezone` or `location`
+then the specified `time` will be assumed to be **UTC time** and not
+at the local timezone of the host.
+
+# AUTHOR
+
+Andreas Hadjiprocopis, `<bliako at cpan.org>`
+
+# DEDICATIONS
+
+Marathon Almaz
+
+# BUGS
+
+Please report any bugs or feature requests to `bug-astro-moonphase-simple at rt.cpan.org`, or through
+the web interface at [https://rt.cpan.org/NoAuth/ReportBug.html?Queue=Astro-MoonPhase-Simple](https://rt.cpan.org/NoAuth/ReportBug.html?Queue=Astro-MoonPhase-Simple).  I will be notified, and then you'll
+automatically be notified of progress on your bug as I make changes.
+
+# SUPPORT
+
+You can find documentation for this module with the perldoc command.
+
+    perldoc Astro::MoonPhase::Simple
+
+You can also look for information at:
+
+- RT: CPAN's request tracker (report bugs here)
+
+    [https://rt.cpan.org/NoAuth/Bugs.html?Dist=Astro-MoonPhase-Simple](https://rt.cpan.org/NoAuth/Bugs.html?Dist=Astro-MoonPhase-Simple)
+
+- Search CPAN
+
+    [https://metacpan.org/release/Astro-MoonPhase-Simple](https://metacpan.org/release/Astro-MoonPhase-Simple)
+
+# ACKNOWLEDGEMENTS
+
+The authors of [Astro::MoonPhase](https://metacpan.org/pod/Astro%3A%3AMoonPhase) take all the credit.
+
+# LICENSE AND COPYRIGHT
+
+This software is Copyright (c) 2024 by Andreas Hadjiprocopis.
+
+This is free software, licensed under:
+
+    The Artistic License 2.0 (GPL Compatible)
